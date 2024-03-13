@@ -21,7 +21,26 @@
 <script setup>
 const props = defineProps({ blok: Object });
 
-const products = (useProducts() || []).filter(
-  (p) => blok.category === "" || p.content.category === blok.category
+const products = ref([]);
+
+watch(
+  () => props.blok.category,
+  async () => {
+    const filters =
+      props.blok.category !== ""
+        ? {
+            category: {
+              in: props.blok.category,
+            },
+          }
+        : {};
+    products.value = (
+      await useStoryblokApi().get(`cdn/stories`, {
+        starts_with: "products/",
+        filter_query: filters,
+      })
+    ).data.stories;
+  },
+  { immediate: true }
 );
 </script>
